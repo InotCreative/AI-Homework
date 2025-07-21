@@ -7,8 +7,8 @@ class GameMachanics:
     def flattenState(self, stateToFlatten: list[list[int]]) -> tuple[int, ...]:
         flattenedState = []
 
-        for row in range(0, len(stateToFlatten)):
-            for collum in range(0, len(stateToFlatten[row])):
+        for row in range(0, self.n):
+            for collum in range(0, self.n):
                 flattenedState.append(stateToFlatten[row][collum])
         
         return tuple(flattenedState)
@@ -30,7 +30,6 @@ class GameMachanics:
         return moves
 
     def generateSuccessorStates(self, state: list[list[int]]) -> list[list[list[int]]]:
-        
         possibleMoves: list[str] = self.findPossibleMoves(state)
         
         successorStates: list[list[list[int]]] = []

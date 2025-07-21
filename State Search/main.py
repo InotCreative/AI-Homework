@@ -6,7 +6,10 @@ from typing import List
 import time
 
 def main():
-    # Assuming that 0 is the blank
+    startState: List[List[List[int]], int] = FileHandle("start.txt").fileRead()
+    goalState: List[List[List[int]], int] = FileHandle("goal.txt").fileRead()
+
+    GameMachanics(startState[1]).printMoves(UninformedSearch(startState[0], goalState[0], startState[1]).uniformCostingSearch())
     
 if __name__ == "__main__":
     main()
