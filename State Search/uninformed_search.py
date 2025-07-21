@@ -128,11 +128,6 @@ class UninformedSearch:
         path.reverse()
         return path
     
-    '''
-    dls - Depth Limited Search (Note: Depth Limit will be obtained as a Console Input) [Note: This part is EC for CSE 4308 students]
-    ids - Iterative Deepening Search [Note: This part is EC for CSE 4308 students]
-    '''
-
     def depthLimitedSearch(self, depth: int) -> List[List[List[int]]]:
         stackOfStates: Deque[Tuple[List[List[int]], int]] = deque()
         stackOfStates.append((self.startState, 0))
