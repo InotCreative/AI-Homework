@@ -14,8 +14,8 @@ class GameMachanics:
         return tuple(flattenedState)
     
     def findBlankPosition(self, state: list[list[int]]) -> tuple[int, int]:
-        for row in range(0, len(state)):
-            for collum in range(0, len(state[row])):
+        for row in range(0, self.n):
+            for collum in range(0, self.n):
                 if (state[row][collum] == 0): return (row, collum)
     
     def findPossibleMoves(self, state) -> list[str]:

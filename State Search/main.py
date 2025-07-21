@@ -9,7 +9,7 @@ def main():
     startState: List[List[List[int]], int] = FileHandle("start.txt").fileRead()
     goalState: List[List[List[int]], int] = FileHandle("goal.txt").fileRead()
 
-    GameMachanics(startState[1]).printMoves(UninformedSearch(startState[0], goalState[0], startState[1]).uniformCostingSearch())
+    GameMachanics(startState[1]).printMoves(InformedSearch(startState[0], goalState[0], startState[1]).greedySearch())
     
 if __name__ == "__main__":
     main()
