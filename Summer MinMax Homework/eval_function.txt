@@ -1,0 +1,31 @@
+Red-Blue Nim Evaluation Function Reasoning
+==========================================
+
+In the depth-limited MinMax search for the red-blue nim game, the evaluation function is used to estimate the value of a non-terminal game state when the search depth limit is reached. The function is defined as:
+
+    evalFunction(state, standardGame):
+        if state["red"] == 0 or state["blue"] == 0:
+            return 0
+        score = 2 * state["red"] + 3 * state["blue"]
+        return score if standardGame else -score
+
+**Reasoning:**
+
+1. **Game Objective:**
+   - In both standard and misère versions, the game ends when either pile is empty. The final score is calculated as 2 points for each red marble and 3 points for each blue marble remaining at the end of the game.
+
+2. **Heuristic Value:**
+   - The evaluation function uses the same formula as the final score: `2 * red + 3 * blue`. This reflects the value of the marbles left in the game, which directly impacts the outcome.
+
+3. **Perspective:**
+   - For the standard game, a higher score is better for the computer (since the computer wants to avoid losing points).
+   - For the misère game, the sign is inverted (`-score`) because the win/loss condition is reversed: the computer wants to force the human to take the last marble, so a lower score is better for the computer.
+
+4. **Terminal State:**
+   - If a terminal state is reached (either pile is empty), the evaluation function returns 0, as the utility function will handle the actual win/loss outcome.
+
+5. **Simplicity and Effectiveness:**
+   - This evaluation function is simple, directly tied to the game's scoring rules, and provides a meaningful heuristic for the MinMax algorithm to make decisions when it cannot search to the end of the game tree.
+
+**Summary:**
+The evaluation function estimates the desirability of a game state by calculating the total value of marbles left, adjusted for the game version. This aligns with the game's scoring and provides a good heuristic for depth-limited search. 
