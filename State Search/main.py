@@ -30,14 +30,14 @@ def printHelp():
     python main.py is as
 """)
 
-def main():
+def main() -> int:
     banner()
 
     if len(sys.argv) < 3:
         printHelp()
-        return
+        return 0
 
-    search_type = sys.argv[1].lower()
+    searchType = sys.argv[1].lower()
     algorithm = sys.argv[2].lower()
     depth = int(sys.argv[3]) if len(sys.argv) > 3 and sys.argv[3].isdigit() else None
 
@@ -46,12 +46,12 @@ def main():
         goalState: List[List[List[int]], int] = FileHandle("goal.txt").fileRead()
     except Exception as e:
         print(f"\033[91mError reading files: {e}\033[0m")
-        return
+        return 0
 
     start_time = time.time()
 
     try:
-        if search_type == "is":
+        if searchType == "is":
             search = InformedSearch(startState[0], goalState[0], startState[1])
             if algorithm == "gs":
                 result = search.greedySearch()
@@ -60,7 +60,7 @@ def main():
             else:
                 raise ValueError("Supported informed algorithms: gs, as")
 
-        elif search_type == "us":
+        elif searchType == "us":
             search = UninformedSearch(startState[0], goalState[0], startState[1])
             if algorithm == "bfs":
                 result = search.bredthFirstSearch()

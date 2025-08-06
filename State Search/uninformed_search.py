@@ -2,6 +2,7 @@ from game_machenics import GameMachanics
 from collections import deque
 import heapq
 from typing import List, Tuple, Optional, Dict, Set, Deque
+from functools import cache
 
 class UninformedSearch:
     def __init__(self, startState: List[List[int]], goalState: List[List[int]], n: int) -> None:
@@ -12,6 +13,7 @@ class UninformedSearch:
         self.startStateKey: Tuple[int, ...] = self.GameMachanics.flattenState(self.startState)
         self.goalStateKey: Tuple[int, ...]  = self.GameMachanics.flattenState(self.goalState)
     
+    @cache
     def bredthFirstSearch(self) -> List[List[List[int]]]:
         queueOfStates: Deque[List[List[int]]] = deque()  # Holds all states to explore
         queueOfStates.append(self.startState)
@@ -51,6 +53,7 @@ class UninformedSearch:
         path.reverse()
         return path
 
+    @cache
     def depthFirstSearch(self) -> List[List[List[int]]]:
         stackOfStates: Deque[List[List[int]]] = deque()
         stackOfStates.append(self.startState)
@@ -90,6 +93,7 @@ class UninformedSearch:
         path.reverse()
         return path
 
+    @cache
     def uniformCostingSearch(self) -> List[List[List[int]]]:
         minHeapOfStates: List[Tuple[int, List[List[int]]]] = []
         heapq.heappush(minHeapOfStates, (0, self.startState))
@@ -128,6 +132,7 @@ class UninformedSearch:
         path.reverse()
         return path
     
+    @cache
     def depthLimitedSearch(self, depth: int) -> List[List[List[int]]]:
         stackOfStates: Deque[Tuple[List[List[int]], int]] = deque()
         stackOfStates.append((self.startState, 0))
@@ -167,6 +172,7 @@ class UninformedSearch:
 
         return path
     
+    @cache
     def itterativeDeepeningSearch(self, maxDepth: int) -> List[List[List[int]]]:
         for depth in range(0, maxDepth + 1):
             result: List[List[List[int]]] = self.depthLimitedSearch(depth)

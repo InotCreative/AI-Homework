@@ -1,6 +1,9 @@
 from typing import Dict, List
 
-class NimStandard:
+class NimGame:
+    pass
+
+class NimGameNonPruning:
     def __init__(self):
         self.gameState: Dict[str, int] = {"blue": 5,"red": 5}
 
@@ -20,8 +23,18 @@ class NimStandard:
         else: sucessorStates.append({"blue": state["blue"], "red": state["red"] - 1})
 
         return sucessorStates
+    
+    """
+    def utlityFunction(self, state: Dict[str, str]) -> int:
+        if (self.isTerminalState(state) == True):
 
-    def minMaxTreeFull(self):
-        pass
+    """
+    def isTerminalState(self, state: Dict[str, str]) -> bool:
+        if (state["red"] == 0 or state["blue"] == 0): return True
+        else: return False
+    
+    
+     
 
-        
+class NimGamePruning:
+    pass

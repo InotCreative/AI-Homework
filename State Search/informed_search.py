@@ -2,6 +2,7 @@ from game_machenics import GameMachanics
 from collections import deque
 import heapq
 from typing import List, Tuple, Optional, Dict, Set, Deque
+from functools import cache
 
 class InformedSearch:
     def __init__(self, startState: List[List[int]], goalState: List[List[int]], n: int) -> None:
