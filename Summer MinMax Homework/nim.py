@@ -7,6 +7,7 @@ def evalFunction(state: Dict[str, Union[int, str]], standardGame: bool) -> int:
     if state["red"] == 0 or state["blue"] == 0: return 0
 
     score: int = 2 * int(state["red"]) + 3 * int(state["blue"])
+
     return score if standardGame else -score
 
 class GamePlay:
@@ -18,8 +19,7 @@ class GamePlay:
         self.standardGame: bool = standardGame
 
     def parseHumanInput(self, previousState: Dict[str, Union[str, int]]) -> Tuple[Optional[Dict[str, Union[str, int]]], Optional[str]]:
-        if self.isTerminalState(previousState):
-            return (None, None)
+        if self.isTerminalState(previousState): return (None, None)
 
         print("\033[34m\n" + '=' * 90)
         print("HUMAN TURN".center(90))
@@ -31,10 +31,9 @@ class GamePlay:
         while True:
             try:
                 humanAction: int = int(input("\nCHOOSE ACTION \033[31m(INT): \033[0m"))
-                if 0 <= humanAction < len(actions):
-                    break
-                else:
-                    print("Invalid action. Try again.")
+                
+                if 0 <= humanAction < len(actions): break
+                else: print("Invalid action. Try again.")
             except ValueError:
                 print("Invalid input. Enter an integer.")
 
@@ -74,10 +73,8 @@ class GamePlay:
 
     def utilityFunction(self, state: Dict[str, Union[int, str]]) -> int:
         if self.isTerminalState(state):
-            lastPlayer: str = "human" if state["player"] == "computer" else "computer"
-        
-            if self.standardGame: return 1 if lastPlayer == "computer" else -1
-            else: return -1 if lastPlayer == "computer" else 1
+            if self.standardGame: return 1 if state["player"] == "computer" else -1
+            else: return 1 if state["player"] == "human" else -1
         
         return 0
 
@@ -115,6 +112,7 @@ class Nim:
             if value <= alpha: return value
         
             beta = min(beta, value)
+        
         return value
 
 class NimWithDepth(Nim):
@@ -122,43 +120,40 @@ class NimWithDepth(Nim):
         super().__init__(numberOfRedMarbles, numberOfBlueMarbles, firstPlayer, standardGame)
         self.depth: Optional[int] = depth
         self.standardGame: bool = standardGame
-
-    def maxPlayer(self, state: Dict[str, Union[int, str]], alpha: float, beta: float, depth: Optional[int] = None) -> int:
-        if depth is None: depth = self.depth
+    
+    def maxPlayer(self, state: Dict[str, Union[int, str]], alpha: float, beta: float) -> int:
+        if self.gamePlay.isTerminalState(state):  return self.gamePlay.utilityFunction(state)
         
-        if self.gamePlay.isTerminalState(state): return self.gamePlay.utilityFunction(state)
-        if depth == 0: return evalFunction(state, self.standardGame)
-        
+        if self.depth is not None and int(state["depth"]) >= self.depth: return evalFunction(state, self.standardGame)
+            
         value: float = -math.inf
         successorStates, actions = self.gamePlay.generateSuccessorStates(state)
-        order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]        
-        
-        for idx in order:
-            if idx >= len(successorStates): continue
-            
-            value = max(value, self.minPlayer(successorStates[idx], alpha, beta, None if depth is None else depth - 1))
-            
-            if value >= beta: return value
-            
-            alpha = max(alpha, value)
-        
-        return value
-
-    def minPlayer(self, state: Dict[str, Union[int, str]], alpha: float, beta: float, depth: Optional[int] = None) -> int:
-        if depth is None: depth = self.depth
-
-        if self.gamePlay.isTerminalState(state): return self.gamePlay.utilityFunction(state)
-        if depth == 0: return evalFunction(state, self.standardGame)
-
-        value: float = math.inf
-        successorStates, actions = self.gamePlay.generateSuccessorStates(state)
-
         order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
 
         for idx in order:
             if idx >= len(successorStates): continue
             
-            value = min(value, self.maxPlayer(successorStates[idx], alpha, beta, None if depth is None else depth - 1))
+            value = max(value, self.minPlayer(successorStates[idx], alpha, beta))
+            
+            if value >= beta: return value
+            
+            alpha = max(alpha, value)
+
+        return value
+
+    def minPlayer(self, state: Dict[str, Union[int, str]], alpha: float, beta: float) -> int:
+        if self.gamePlay.isTerminalState(state): return self.gamePlay.utilityFunction(state)
+        
+        if self.depth is not None and int(state["depth"]) >= self.depth: return evalFunction(state, self.standardGame)
+            
+        value: float = math.inf
+        successorStates, actions = self.gamePlay.generateSuccessorStates(state)
+        order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
+        
+        for idx in order:
+            if idx >= len(successorStates): continue
+            
+            value = min(value, self.maxPlayer(successorStates[idx], alpha, beta))
             
             if value <= alpha: return value
             
@@ -171,11 +166,11 @@ class NimWithDepth(Nim):
         bestValue: float = -math.inf
         bestIdx: int = 0
         order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
-
+        
         for idx in order:
             if idx >= len(successorStates): continue
             
-            value: int = self.minPlayer(successorStates[idx], -math.inf, math.inf, None if self.depth is None else self.depth - 1)
+            value: int = self.minPlayer(successorStates[idx], -math.inf, math.inf)
             
             if value > bestValue:
                 bestValue = value
@@ -204,11 +199,8 @@ class RedBlueNimGame:
                 print("=" * 90 + "\033[0m")
                 score: int = 2 * int(self.state["red"]) + 3 * int(self.state["blue"])
                 
-                # Determine winner based on game type
-                if self.standardGame:
-                    winner: str = "computer" if self.state["player"] == "human" else "human"
-                else:
-                    winner: str = "human" if self.state["player"] == "human" else "computer"
+                if self.standardGame: winner: str = "human" if self.state["player"] == "human" else "computer"
+                else: winner: str = "computer" if self.state["player"] == "human" else "human"
                 
                 print(f"Winner: {winner}")
                 print(f"Final score: {score} points {'won' if winner == 'computer' else 'lost'} by computer.")
@@ -218,15 +210,21 @@ class RedBlueNimGame:
                 print("\n\033[31m" + "=" * 90)
                 print("COMPUTER TURN".center(90))
                 print("=" * 90 + "\033[0m")
+
                 nextState, action = self.nim.bestMove(self.state)
+                
                 print(f"Computer chooses: {action}")
                 nextState["player"] = "computer"
+                
                 self.state = nextState
                 self.currentPlayer = "human"
             else:
                 nextState, action = self.nim.gamePlay.parseHumanInput(self.state)
-                if nextState is None:
-                    continue
+                
+                if nextState is None: continue
+                
                 nextState["player"] = "human"
+                
                 self.state = nextState
                 self.currentPlayer = "computer"
+

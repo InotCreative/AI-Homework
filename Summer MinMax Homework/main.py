@@ -2,8 +2,11 @@ import sys
 import textwrap
 from typing import Dict, Union, List, Optional
 from nim import RedBlueNimGame
+import os
 
 def main() -> int:
+    os.system("clear" if os.name == "posix" else "cls")
+    
     print("\033[34m" + "=" * 90)
     print("🧠 GAME PLAYING PROBLEM: MIN-MAX SEARCH FOR NIM CLI".center(90))
     print("=" * 90 + "\033[0m")
@@ -11,7 +14,7 @@ def main() -> int:
     if len(sys.argv) < 3:
         help: str = """
         \033[93mUsage:\033[0m
-            python3 red_blue_nim.py <num-red> <num-blue> [<version>] [<first-player>] [-d <depth>]
+            python3 main.py <num-red> <num-blue> [<version>] [<first-player>] [-d <depth>]
 
         \033[93mArguments:\033[0m
             \033[96m<num-red>\033[0m:   Number of red marbles (required)
@@ -32,7 +35,7 @@ def main() -> int:
             - Turns alternate until either pile is empty
 
         \033[93mExample:\033[0m
-            python3 red_blue_nim.py 3 4 -m -h -d 4
+            python3 main.py 3 4 -m -h -d 4
         """
 
         print(textwrap.dedent(help))
