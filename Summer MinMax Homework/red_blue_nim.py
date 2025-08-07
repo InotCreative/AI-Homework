@@ -14,7 +14,7 @@ def main() -> int:
     if len(sys.argv) < 3:
         help: str = """
         \033[93mUsage:\033[0m
-            python3 main.py <num-red> <num-blue> [<version>] [<first-player>] [-d <depth>]
+            python3 red_blue_nim <num-red> <num-blue> [<version>] [<first-player>] [-d <depth>]
 
         \033[93mArguments:\033[0m
             \033[96m<num-red>\033[0m:   Number of red marbles (required)
@@ -35,7 +35,7 @@ def main() -> int:
             - Turns alternate until either pile is empty
 
         \033[93mExample:\033[0m
-            python3 main.py 3 4 -m -h -d 4
+            python3 red_blue_nim 3 4 -m -h -d 4
         """
 
         print(textwrap.dedent(help))
@@ -51,14 +51,13 @@ def main() -> int:
     while i < len(sys.argv):
         arg: str = sys.argv[i]
         
-        if arg == "-m":
-            standardGame = False
-        elif arg == "-h":
-            firstPlayer = "human"
+        if arg == "-m": standardGame = False
+        elif arg == "-h": firstPlayer = "human"
         elif arg == "-d":
             if i + 1 < len(sys.argv):
                 depth = int(sys.argv[i + 1])
                 i += 1
+
         i += 1
 
     game: RedBlueNimGame = RedBlueNimGame(numRed, numBlue, standardGame, firstPlayer, depth)

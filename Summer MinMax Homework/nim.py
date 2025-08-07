@@ -1,12 +1,10 @@
 from typing import Dict, List, Union, Tuple, Optional
 import math
-import sys
-import argparse
 
 def evalFunction(state: Dict[str, Union[int, str]], standardGame: bool) -> int:
     if state["red"] == 0 or state["blue"] == 0: return 0
 
-    score: int = 2 * int(state["red"]) + 3 * int(state["blue"])
+    score: int = (2 * int(state["red"])) + (3 * int(state["blue"]))
 
     return score if standardGame else -score
 
@@ -72,11 +70,15 @@ class GamePlay:
         return False
 
     def utilityFunction(self, state: Dict[str, Union[int, str]]) -> int:
-        if self.isTerminalState(state):
-            if self.standardGame: return 1 if state["player"] == "computer" else -1
-            else: return 1 if state["player"] == "human" else -1
-        
-        return 0
+        if (self.isTerminalState(state) == True):
+            score: int = (2 * int(state["red"])) + (3 * int(state["blue"]))
+
+            if (state["player"] == "computer"):
+                if (self.standardGame == True): return -score
+                else: return score
+            else:
+                if (self.standardGame): return score
+                else: return -score
 
 class Nim:
     def __init__(self, numberOfRedMarbles: int, numberOfBlueMarbles: int, firstPlayer: str, standardGame: bool) -> None:
@@ -84,36 +86,71 @@ class Nim:
         self.numberOfBlueMarbles: int = numberOfBlueMarbles
         self.firstPlayer: str = firstPlayer
         self.gamePlay: GamePlay = GamePlay(numberOfRedMarbles=numberOfRedMarbles, numberOfBlueMarbles=numberOfBlueMarbles, firstPlayer=firstPlayer, standardGame=standardGame)
+        self.standardGame: bool = standardGame
+    
+    def getMoveOrder(self) -> List[int]:
+        '''
+        For standard version: [1, 0, 3, 2] corresponds to:
+        1: Pick 2 red marble
+        0: Pick 2 blue marble
+        3: Pick 1 red marble
+        2: Pick 1 blue marble
+        For misère version, invert the order: [2, 3, 0, 1]
+        '''
 
+        return [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
+    
     def maxPlayer(self, state: Dict[str, Union[int, str]], alpha: float, beta: float) -> int:
-        if self.gamePlay.isTerminalState(state): return self.gamePlay.utilityFunction(state)
+        if self.gamePlay.isTerminalState(state): 
+            return self.gamePlay.utilityFunction(state)
         
         value: float = -math.inf
         successorStates, actions = self.gamePlay.generateSuccessorStates(state)
+        order = self.getMoveOrder()
         
-        for index, states in enumerate(successorStates):
-            value = max(value, self.minPlayer(states, alpha, beta))
-            
-            if value >= beta: return value
-            
-            alpha = max(alpha, value)
+        for idx in order:
+            if idx < len(successorStates):
+                value = max(value, self.minPlayer(successorStates[idx], alpha, beta))
+                
+                if value >= beta: return value
+                
+                alpha = max(alpha, value)
         
         return value
-
+    
     def minPlayer(self, state: Dict[str, Union[int, str]], alpha: float, beta: float) -> int:
-        if self.gamePlay.isTerminalState(state): return self.gamePlay.utilityFunction(state)
+        if self.gamePlay.isTerminalState(state): 
+            return self.gamePlay.utilityFunction(state)
         
         value: float = math.inf
         successorStates, actions = self.gamePlay.generateSuccessorStates(state)
+        order = self.getMoveOrder()
         
-        for index, states in enumerate(successorStates):
-            value = min(value, self.maxPlayer(states, alpha, beta))
-            
-            if value <= alpha: return value
-        
-            beta = min(beta, value)
+        for idx in order:
+            if idx < len(successorStates):
+                value = min(value, self.maxPlayer(successorStates[idx], alpha, beta))
+                    
+                if value <= alpha: return value
+                    
+                beta = min(beta, value)
         
         return value
+    
+    def bestMove(self, state: Dict[str, Union[int, str]]) -> Tuple[Dict[str, Union[int, str]], str]:
+        successorStates, actions = self.gamePlay.generateSuccessorStates(state)
+        bestValue: float = -math.inf
+        bestIdx: int = 0
+        order = self.getMoveOrder()
+        
+        for idx in order:
+            if idx < len(successorStates):
+                value: int = self.minPlayer(successorStates[idx], -math.inf, math.inf)
+                    
+                if value > bestValue:
+                    bestValue = value
+                    bestIdx = idx
+        
+        return successorStates[bestIdx], actions[bestIdx]
 
 class NimWithDepth(Nim):
     def __init__(self, numberOfRedMarbles: int, numberOfBlueMarbles: int, firstPlayer: str, standardGame: bool, depth: Optional[int] = None) -> None:
@@ -128,11 +165,9 @@ class NimWithDepth(Nim):
             
         value: float = -math.inf
         successorStates, actions = self.gamePlay.generateSuccessorStates(state)
-        order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
+        order: List[int] = super().getMoveOrder()
 
-        for idx in order:
-            if idx >= len(successorStates): continue
-            
+        for idx in order:            
             value = max(value, self.minPlayer(successorStates[idx], alpha, beta))
             
             if value >= beta: return value
@@ -148,11 +183,9 @@ class NimWithDepth(Nim):
             
         value: float = math.inf
         successorStates, actions = self.gamePlay.generateSuccessorStates(state)
-        order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
+        order: List[int] = super().getMoveOrder()
         
-        for idx in order:
-            if idx >= len(successorStates): continue
-            
+        for idx in order:            
             value = min(value, self.maxPlayer(successorStates[idx], alpha, beta))
             
             if value <= alpha: return value
@@ -167,9 +200,7 @@ class NimWithDepth(Nim):
         bestIdx: int = 0
         order: List[int] = [2, 3, 0, 1] if not self.standardGame else [1, 0, 3, 2]
         
-        for idx in order:
-            if idx >= len(successorStates): continue
-            
+        for idx in order:            
             value: int = self.minPlayer(successorStates[idx], -math.inf, math.inf)
             
             if value > bestValue:
@@ -185,9 +216,12 @@ class RedBlueNimGame:
         self.standardGame: bool = standardGame
         self.firstPlayer: str = firstPlayer
         self.depth: Optional[int] = depth
-        self.nim: NimWithDepth = NimWithDepth(numberOfRedMarbles, numberOfBlueMarbles, firstPlayer, standardGame, depth)
         self.state: Dict[str, Union[int, str]] = {"red": numberOfRedMarbles, "blue": numberOfBlueMarbles, "player": "root", "depth": 0}
         self.currentPlayer: str = firstPlayer
+        self.nim: Union[Nim, NimWithDepth] = None
+
+        if depth is None: self.nim = Nim(numberOfRedMarbles, numberOfBlueMarbles, firstPlayer, standardGame)
+        else: self.nim = NimWithDepth(numberOfRedMarbles, numberOfBlueMarbles, firstPlayer, standardGame, depth)
 
     def startGame(self) -> None:
         print(f"Starting Red-Blue Nim: {self.numberOfRedMarbles} red, {self.numberOfBlueMarbles} blue, {'standard' if self.standardGame else 'misère'} version, {self.firstPlayer} goes first" + (f", depth limit {self.depth}" if self.depth else ""))
